@@ -13,26 +13,26 @@ varITRmax = 3;
 %% input parameters of your planet
 
 % core composition
-comp_IC = 5; %1=Fe,liq 2=Fe,sol 3=Fe3S,sol 5=FeSV,sol inner core composition
-comp_mantle = 10; % 7=crust 8=FC 9=MA 10=MC mantle composition
+comp_IC = 2; %1=Fe,liq 2=Fe,sol 3=Fe3S,sol 5=FeSV,sol inner core composition
+comp_mantle = 9; % 7=crust 8=FC 9=MA 10=MC mantle composition
 
 % constants
 G = 6.6743e-11;
 
 % contraints
 M_p = 0.330103e24; %+-0.000021e24
+R_p = 2439.4e3; %+-0.1
 CMR2 = 0.346; %+-0.014
 ImIc_meas = 0.431; %+-0.025
-R_p = 2440e3; %+-1
 
 % parameters
-rho_m_ref = [2800,3600]; % mantle density
+rho_m_ref = [2900,3300]; % mantle density
 t_s_ref = [50e3,200e3]; % silicate shell thickness
-T_core_ref = [1650,2250]; % core-mantle boundary temperature
-T_ICB_ref = [1650,2250]; % isothermal core (X,PX)
+T_core_ref = [2350,2550]; % core-mantle boundary temperature
+T_ICB_ref = [2350,2550]; % isothermal core (X,PX)
 T_CMB_ref = [1600,2000]; % (1, P6)
 T_crust_ref = [0,0]; % interpolate conductivily from CMB to surface
-T_surf_ref = [93.15,703.15]; % night / day
+T_surf_ref = [273.15-180,273.15+430]; % night / day
 
 % materials
 MatData = readtable("MaterialData.xlsx");%material	T_ref	p_ref	rho_0	drho/dp	drho/dT	drho/dXs	drho/dXs2	K_0	dK/dT	dK/dp	dK/dXs	dK/dXs2	a_0	da/dp	da/dT	Mw	Cp_A	Cp_B	Cp_C	Cp_D	Cp_E	k
@@ -79,7 +79,8 @@ while (varITR <= varITRmax) & last_ITR <= 1
             [Xvars(1),Xvars(2),Xvars(3),"-.",1,mean(rho_m_ref),t_s_ref(1),mean(T_core_ref),mean(T_ICB_ref),mean(T_CMB_ref),mean(T_crust_ref),mean(T_surf_ref)],
             [Xvars(1),Xvars(2),Xvars(3),"-.",1,mean(rho_m_ref),t_s_ref(2),mean(T_core_ref),mean(T_ICB_ref),mean(T_CMB_ref),mean(T_crust_ref),mean(T_surf_ref)],
             [Xvars(1),Xvars(2),Xvars(3),":",1,mean(rho_m_ref),mean(t_s_ref),T_core_ref(1),T_ICB_ref(1),T_CMB_ref(1),T_crust_ref(1),T_surf_ref(1)],
-            [Xvars(1),Xvars(2),Xvars(3),":",1,mean(rho_m_ref),mean(t_s_ref),T_core_ref(2),T_ICB_ref(2),T_CMB_ref(2),T_crust_ref(2),T_surf_ref(2)]
+            [Xvars(1),Xvars(2),Xvars(3),":",1,mean(rho_m_ref),mean(t_s_ref),T_core_ref(2),T_ICB_ref(2),T_CMB_ref(2),T_crust_ref(2),T_surf_ref(2)],
+            [Xvars(1),Xvars(2),Xvars(3),"-",2,mean(rho_m_ref),mean(t_s_ref),mean(T_core_ref),mean(T_ICB_ref),mean(T_CMB_ref),mean(T_crust_ref),mean(T_surf_ref)]
             ];
     end
     
@@ -334,7 +335,7 @@ while (varITR <= varITRmax) & last_ITR <= 1
         disp(['Measured I/MR^2 is ' num2str(CMR2) ' -'])
         disp(['Numerical I/MR2 is ' num2str(MOI_ratio) ' -'])
         disp(['Difference is ' num2str((CMR2-MOI_ratio)/CMR2*100) ' percent'])
-        disp('==============================================')
+        disp('----------------------------------------------')
         Ic = Interior(int64(R_CMB/Dr)-1,3);
         Im = I-Ic;
         ImIc = Im/I;
@@ -454,3 +455,6 @@ disp(['planetary moment of inertia ratio:', num2str(CMR2), '+error:', num2str((d
 disp(['planetary moment of inertia ratio:', num2str(MOI_ratio), '+error:', num2str(100*(delta_tar(1,2))/CMR2), '+-', num2str(max(abs(delta_tar(:,2)))/CMR2), ' [%]']);
 disp(['mantle to core moment of inertia ratio:', num2str(ImIc_meas), '+error:', num2str((delta_tar(1,3))), '+-', num2str(max(abs(delta_tar(:,3)))), ' [-]']);
 disp(['mantle to core moment of inertia ratio:', num2str(ImIc), '+error:', num2str(100*(delta_tar(1,3))/ImIc_meas), '+-', num2str(max(abs(delta_tar(:,3)))/ImIc_meas), ' [%]']);
+disp('VALIDATION');
+disp(['pressure at CMB ' num2str(Interior(int64(R_mc/Dr)+1,5)/10^9) 'GPa']);
+disp(['pressure at core ' num2str(Interior(1,5)/10^9) 'GPa']);
